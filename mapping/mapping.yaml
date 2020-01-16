@@ -1,0 +1,18 @@
+tags:
+  load_all: true
+  exclude: [created_by, source*, "tiger:*"]
+
+tables:
+  # The result table will be import.osm_ways,
+  # keep this name for ImpOsm2pgRouting
+  ways:
+    type: linestring
+    mapping:
+      highway: [__any__]
+    columns:
+    - name: osm_id
+      type: id
+    - name: geometry
+      type: geometry
+    - name: tags
+      type: hstore_tags

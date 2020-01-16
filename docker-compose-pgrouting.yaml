@@ -1,0 +1,13 @@
+version: '3'
+
+volumes:
+  pgrouting_pgdata:
+
+services:
+  pgrouting:
+    image: pgrouting/pgrouting
+    env_file: env
+    volumes:
+      - pgrouting_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432"

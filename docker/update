@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -o errexit
+set -o pipefail
+set -o nounset
+
+export PGCON="$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:${POSTGRES_PORT:-5432}/$POSTGRES_DB"
+
+echo "Pooling for update, stop with one CTRL-C and wait."
+/opt/imposm/update.sh "/import/latest.json"

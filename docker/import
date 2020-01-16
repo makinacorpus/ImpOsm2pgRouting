@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -o errexit
+set -o pipefail
+set -o nounset
+
+PROVIDER=$1
+AREA=$2
+
+export PGCON="$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:${POSTGRES_PORT:-5432}/$POSTGRES_DB"
+
+# Download
+PBF=$(/opt/docker/download-extract.sh "${PROVIDER}" "${AREA}")
+
+# Import PBF
+echo "Start import ${PBF}"
+psql "postgresql://${PGCON}" -c "DROP SCHEMA IF EXISTS imposm2pgr CASCADE; DROP SCHEMA IF EXISTS import CASCADE;"
+rm -fr "/import/???"
+rm -f "/import/latest.json" && ln -s "${PBF}.json" "/import/latest.json"
+/opt/imposm/import.sh "/import/${PBF}" "/import/${PBF}.json"
+
+# Import SQL
+echo "Load ImpOsm2pgRouting into database"
+echo "-- 00_init.sql"
+psql "postgresql://${PGCON}" < /opt/imposm2pgrouting/00_init.sql
+echo "-- 01_vertices.sql"
+psql "postgresql://${PGCON}" < /opt/imposm2pgrouting/01_vertices.sql
+echo "-- 02_edge.sql"
+psql "postgresql://${PGCON}" < /opt/imposm2pgrouting/02_edge.sql
+echo "-- 03_update.sql"
+psql "postgresql://${PGCON}" < /opt/imposm2pgrouting/03_update.sql
+
+# Import SQL
+echo "Load custom SQL"
+psql "postgresql://${PGCON}" < /opt/imposm2pgrouting/10_network.sql

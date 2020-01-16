@@ -1,0 +1,22 @@
+version: '3'
+
+volumes:
+  cache:
+
+services:
+  imposm2pgrouting:
+    image: imposm2pgrouting
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    env_file: env
+    volumes:
+    # Imposm
+    - ./import:/import
+    - ./mapping:/mapping
+    - cache:/cache
+    # Override for dev
+    - ./docker:/opt/docker
+    - ./pgRouting/:/opt/imposm2pgrouting
+    - ./imposm/import.sh:/opt/imposm/import.sh
+    - ./imposm/update.sh:/opt/imposm/update.sh
